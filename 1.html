@@ -1,0 +1,317 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Задачи на работу с числами</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: pink;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .result {
+            font-family: Arial, sans-serif;
+            color: black;
+            margin-top: 5px;
+
+        }
+        button {
+            background-color: rosybrown;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Задачи на работу с числами</h1>
+        <div class="task">
+            <h3>1.1. Проверка взаимной простоты двух чисел</h3>
+            <div class="input-group">
+                <input type="number" id="num1_1" placeholder="Первое число" min="1">
+                <input type="number" id="num2_1" placeholder="Второе число" min="1">
+                <button onclick="checkCoprime()">Проверить взаимную простоту</button>
+            </div>
+            <div id="result1" class="result"></div>
+        </div>
+        <div class="task">
+            <h3>1.2. Проверка числа на простоту</h3>
+            <div class="input-group">
+                <input type="number" id="num2" placeholder="Введите число" min="1">
+                <button onclick="checkPrime()">Проверить на простоту</button>
+            </div>
+            <div id="result2" class="result"></div>
+        </div>
+
+        <div class="task">
+            <h3>1.3. Решето Эратосфена</h3>
+            <div class="input-group">
+                <input type="number" id="num3" placeholder="Введите N" min="2">
+                <button onclick="sieveOfEratosthenes()">Найти простые числа</button>
+            </div>
+            <div id="result3" class="result"></div>
+        </div>
+
+
+        <div class="task">
+            <h3>1.4. Первые N простых чисел</h3>
+            <div class="input-group">
+                <input type="number" id="num4" placeholder="Введите N" min="1">
+                <button onclick="firstNPrimes()">Найти первые N простых</button>
+            </div>
+            <div id="result4" class="result"></div>
+        </div>
+
+        <div class="task">
+            <h3>1.5. Найти все делители числа</h3>
+            <div class="input-group">
+                <input type="number" id="num5" placeholder="Введите число" min="1">
+                <button onclick="findDivisors()">Найти делители</button>
+            </div>
+            <div id="result5" class="result"></div>
+        </div>
+        <div class="task">
+            <h3>1.6. Разложение на простые множители</h3>
+            <div class="input-group">
+                <input type="number" id="num6" placeholder="Введите число" min="2">
+                <button onclick="primeFactorization()">Разложить на множители</button>
+            </div>
+            <div id="result6" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b !== 0) {
+                const temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        function isPrime(num) {
+            if (num < 2) return false;
+            if (num === 2) return true;
+            if (num % 2 === 0) return false;
+            
+            for (let i = 3; i * i <= num; i += 2) {
+                if (num % i === 0) return false;
+            }
+            return true;
+        }
+
+        function getPrimesUpToN(n) {
+            if (n < 2) return [];
+            
+            const sieve = new Array(n + 1).fill(true);
+            sieve[0] = sieve[1] = false;
+            
+            for (let i = 2; i * i <= n; i++) {
+                if (sieve[i]) {
+                    for (let j = i * i; j <= n; j += i) {
+                        sieve[j] = false;
+                    }
+                }
+            }
+            
+            const primes = [];
+            for (let i = 2; i <= n; i++) {
+                if (sieve[i]) primes.push(i);
+            }
+            return primes;
+        }
+
+        function getFirstNPrimes(n) {
+            const primes = [];
+            let num = 2;
+            
+            while (primes.length < n) {
+                if (isPrime(num)) {
+                    primes.push(num);
+                }
+                num++;
+            }
+            return primes;
+        }
+
+
+        function getAllDivisors(num) {
+            const divisors = [];
+            for (let i = 1; i * i <= num; i++) {
+                if (num % i === 0) {
+                    divisors.push(i);
+                    if (i !== num / i) {
+                        divisors.push(num / i);
+                    }
+                }
+            }
+            return divisors.sort((a, b) => a - b);
+        }
+
+
+        function getPrimeFactorization(num) {
+            const factors = [];
+            let temp = num;
+
+            if (temp % 2 === 0) {
+                let count = 0;
+                while (temp % 2 === 0) {
+                    temp = Math.floor(temp / 2);
+                    count++;
+                }
+                factors.push([2, count]);
+            }
+            
+
+            for (let i = 3; i * i <= temp; i += 2) {
+                if (temp % i === 0) {
+                    let count = 0;
+                    while (temp % i === 0) {
+                        temp = Math.floor(temp / i);
+                        count++;
+                    }
+                    factors.push([i, count]);
+                }
+            }
+
+            if (temp > 1) {
+                factors.push([temp, 1]);
+            }
+            
+            return factors;
+        }
+
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.style.display = 'block';
+            element.className = isError ? 'result error' : 'result';
+        }
+
+
+        function checkCoprime() {
+            const num1 = parseInt(document.getElementById('num1_1').value);
+            const num2 = parseInt(document.getElementById('num2_1').value);
+            
+            if (isNaN(num1) || isNaN(num2) || num1 < 1 || num2 < 1) {
+                showResult('result1', 'Введите корректные натуральные числа', true);
+                return;
+            }
+
+            const result = gcd(num1, num2) === 1;
+            const gcdValue = gcd(num1, num2);
+            showResult('result1', 
+                result ? 
+                `Числа ${num1} и ${num2} <strong>взаимно просты</strong> (НОД = ${gcdValue})` :
+                `Числа ${num1} и ${num2} <strong>не взаимно просты</strong> (НОД = ${gcdValue})`
+            );
+        }
+
+        function checkPrime() {
+            const num = parseInt(document.getElementById('num2').value);
+            
+            if (isNaN(num) || num < 1) {
+                showResult('result2', 'Введите корректное натуральное число', true);
+                return;
+            }
+
+            const result = isPrime(num);
+            showResult('result2', 
+                result ? 
+                `Число ${num} - <strong>простое</strong>` :
+                `Число ${num} - <strong>составное</strong>`
+            );
+        }
+
+        function sieveOfEratosthenes() {
+            const n = parseInt(document.getElementById('num3').value);
+            
+            if (isNaN(n) || n < 2) {
+                showResult('result3', 'Введите N ≥ 2', true);
+                return;
+            }
+
+            const primes = getPrimesUpToN(n);
+            const count = primes.length;
+            showResult('result3', 
+                `Простые числа от 1 до ${n}: <strong>${primes.join(', ')}</strong><br>
+                 Всего найдено: ${count} простых чисел`
+            );
+        }
+
+
+        function firstNPrimes() {
+            const n = parseInt(document.getElementById('num4').value);
+            
+            if (isNaN(n) || n < 1) {
+                showResult('result4', 'Введите корректное N', true);
+                return;
+            }
+
+            const primes = getFirstNPrimes(n);
+            showResult('result4', 
+                `Первые ${n} простых чисел: <strong>${primes.join(', ')}</strong>`
+            );
+        }
+
+        function findDivisors() {
+            const num = parseInt(document.getElementById('num5').value);
+            
+            if (isNaN(num) || num < 1) {
+                showResult('result5', 'Введите корректное натуральное число', true);
+                return;
+            }
+
+            const divisors = getAllDivisors(num);
+            const count = divisors.length;
+            showResult('result5', 
+                `Делители числа ${num}: <strong>${divisors.join(', ')}</strong><br>
+                 Всего делителей: ${count}`
+            );
+        }
+
+        function primeFactorization() {
+            const num = parseInt(document.getElementById('num6').value);
+            
+            if (isNaN(num) || num < 2) {
+                showResult('result6', 'Введите число ≥ 2', true);
+                return;
+            }
+
+            const factorization = getPrimeFactorization(num);
+            let resultHTML = `Разложение числа ${num} на простые множители:<br>`;
+            
+            if (factorization.length === 0) {
+                resultHTML += `<strong>${num} - простое число</strong>`;
+            } else {
+                resultHTML += `<strong>`;
+                factorization.forEach(([prime, power], index) => {
+                    if (index > 0) resultHTML += " × ";
+                    resultHTML += `${prime}`;
+                    if (power > 1) resultHTML += `<sup>${power}</sup>`;
+                });
+                resultHTML += `</strong>`;
+                
+                resultHTML += `<br>Простые множители: `;
+                factorization.forEach(([prime, power]) => {
+                    resultHTML += `${prime} (кратность ${power}), `;
+                });
+                resultHTML = resultHTML.slice(0, -2);
+            }
+            
+            showResult('result6', resultHTML);
+        }
+
+    </script>
+</body>
+</html>
