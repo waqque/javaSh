@@ -1,0 +1,262 @@
+
+<html>
+<head>
+    <title>Работа со структурами данных</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: pink;
+        }
+        .task {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        button {
+            padding: 8px 15px;
+            background: cadetblue;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: rosybrown;
+            white-space: pre-wrap;
+            
+        }
+        input, select {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Работа со структурами данных</h1>
+
+    <div class="task">
+        <h3>2.1. Преобразование kebab-case в camelCase</h3>
+        <input type="text" id="input2_1" value="background-color" placeholder="Введите kebab-case строку">
+        <button onclick="task2_1()">Преобразовать</button>
+        <div id="result2_1" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>2.2. Копирование и разворот массива</h3>
+        <button onclick="task2_2()">Выполнить</button>
+        <div id="result2_2" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>2.3. Переводчик слов</h3>
+        <input type="text" id="input2_3" value = "человек привет книга пока" placeholder="Введите фразу на русском">
+        <select id="lang2_3">
+            <option value="en">Английский</option>
+            <option value="es">Испанский</option>
+            <option value="fr">Французский</option>
+        </select>
+        <button onclick="task2_3()">Перевести</button>
+        <div id="result2_3" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>2.4. Дни недели</h3>
+        <button onclick="task2_4()">Показать текущий день</button>
+        <div id="result2_4" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>2.5. Персонал</h3>
+        <button onclick="task2_5()">Показать персонал</button>
+        <div id="result2_5" class="result"></div>
+    </div>
+
+    <div class="task">
+        <h3>2.6. Управление предметами</h3>
+        <input type="text" id="input2_6" placeholder="Введите предмет">
+        <button onclick="addSubject()">Добавить предмет</button>
+        <button onclick="removeSubject()">Удалить предмет</button>
+        <button onclick="showSubjects()">Показать предметы</button>
+        <div id="result2_6" class="result"></div>
+    </div>
+
+    <script>
+        function task2_1() {
+            let input = document.getElementById('input2_1').value;
+            let result = kebabToCamel(input);
+            document.getElementById('result2_1').innerHTML = 
+                "Исходная строка: " + input + "\n" +
+                "Результат: " + result;
+        }
+
+        function kebabToCamel(str) {
+            let words = str.split('-');
+            let result = words[0];
+            
+            for (let i = 1; i < words.length; i++) {
+                let word = words[i];
+                result += word.charAt(0).toUpperCase() + word.slice(1);
+            }
+            
+            return result;
+        }
+
+        function task2_2() {
+            let original = [9,8,7,6,5,4,3,2,1];
+
+            let copy1 = [...original];
+            let copy2 = original.slice();
+            copy1.reverse();
+            let copy3 = [];
+            for (let i = original.length - 1; i >= 0; i--) {
+                copy3.push(original[i]);
+            }
+            
+            document.getElementById('result2_2').innerHTML = 
+                "Исходный массив: " + original + "\n" +
+                "Развернутый реверсом: " + copy1 + "\n" +
+                "Развернутый циклом: " + copy3;
+        }
+
+        function task2_3() {
+            let text = document.getElementById('input2_3').value;
+            let lang = document.getElementById('lang2_3').value;
+            let result = translate(text, lang);
+            
+            document.getElementById('result2_3').innerHTML = 
+                "Исходный текст: " + text + "\n" +
+                "Перевод: " + result;
+        }
+
+        function translate(text, lang) {
+            let dictionary = {
+                'привет': { en: 'hello', es: 'hola', fr: 'bonjour' },
+                'книга': { en: 'book', es: 'libro', fr: 'livre' },
+                'человек': { en: 'human', es: 'humano', fr: 'humain' },
+                'пока': { en: 'bye', es: 'adiós', fr: 'au revoir' }
+            };
+            
+            let words = text.toLowerCase().split(' ');
+            let result = [];
+            
+            for (let word of words) {
+                if (dictionary[word] && dictionary[word][lang]) {
+                    result.push(dictionary[word][lang]);
+                } else {
+                    result.push(word);
+                }
+            }
+            
+            return result.join(' ');
+        }
+
+        function task2_4() {
+            let days = {
+                1: "Понедельник",
+                2: "Вторник", 
+                3: "Среда",
+                4: "Четверг",
+                5: "Пятница",
+                6: "Суббота",
+                7: "Воскресенье",
+                
+                getCurrentDay: function() {
+                    let today = new Date().getDay();
+                    if (today === 0) today = 7;
+                    return this[today];
+                }
+            };
+            
+            document.getElementById('result2_4').innerHTML = 
+                "Сегодня: " + days.getCurrentDay();
+        }
+        function task2_5() {
+            let personnel1 = {
+                Директор: "Роман Леднев",
+                Менеджер: "Мария Огородникова", 
+                Маркетолог: "Татьяна Бузинаева",
+                Разработчик: "Алена Семенова"
+            };
+
+            let personnel2 = {};
+            for (let key in personnel1) {
+                personnel2[key] = personnel1[key];
+            }
+
+            personnel2.Директор = "Турал Сулейманов";
+            personnel2.Менеджер = "Семен Ильин";
+            
+            let str1 = "";
+            for (let position in personnel1) {
+                str1 += position + ": " + personnel1[position] + "\n";
+            }
+            
+            let str2 = "";
+            for (let position in personnel2) {
+                str2 += position + ": " + personnel2[position] + "\n";
+            }
+            
+            document.getElementById('result2_5').innerHTML = 
+                "персонал1:\n" + str1 + "\n" +
+                "персонал2:\n" + str2;
+        }
+
+        let subjects = {
+            list: "изо, музыка, физра",
+            
+            addSubject: function(subject) {
+                let arr = this.list.split(',');
+                if (!arr.includes(subject)) {
+                    arr.push(subject);
+                    this.list = arr.join(',');
+                    return "Предмет '" + subject + "' добавлен";
+                } else {
+                    return "Предмет '" + subject + "' уже существует";
+                }
+            },
+            
+            removeSubject: function(subject) {
+                let arr = this.list.split(',');
+                let index = arr.indexOf(subject);
+                if (index !== -1) {
+                    arr.splice(index, 1);
+                    this.list = arr.join(',');
+                    return "Предмет '" + subject + "' удален";
+                } else {
+                    return "Предмет '" + subject + "' не найден";
+                }
+            },
+            
+            showSubjects: function() {
+                return "Текущие предметы: " + this.list;
+            }
+        };
+
+        function addSubject() {
+            let subject = document.getElementById('input2_6').value;
+            if (subject) {
+                let result = subjects.addSubject(subject);
+                document.getElementById('result2_6').innerHTML = result + "\n" + subjects.showSubjects();
+            }
+        }
+
+        function removeSubject() {
+            let subject = document.getElementById('input2_6').value;
+            if (subject) {
+                let result = subjects.removeSubject(subject);
+                document.getElementById('result2_6').innerHTML = result + "\n" + subjects.showSubjects();
+            }
+        }
+
+        function showSubjects() {
+            document.getElementById('result2_6').innerHTML = subjects.showSubjects();
+        }
+    </script>
+</body>
+</html>
