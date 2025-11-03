@@ -1,0 +1,138 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Календарик</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+            background: #edc5c5;
+        }
+        
+        .calendar {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+           
+        }
+        
+        .month {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 30px;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            height: 50px;
+        }
+        
+        th {
+            background: #f0f0f0;
+        }
+        
+        .weekend {
+            background: #f8f8f8;
+            color: #666;
+        }
+        
+        .current-day {
+            background: #ea94a1;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar">
+        <div class="month" id="monthTitle"></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Пн</th>
+                    <th>Вт</th>
+                    <th>Ср</th>
+                    <th>Чт</th>
+                    <th>Пт</th>
+                    <th class="weekend">Сб</th>
+                    <th class="weekend">Вс</th>
+                </tr>
+            </thead>
+            <tbody id="calendarTable">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        const monthTitle = document.getElementById('monthTitle');
+        const calendarTable = document.getElementById('calendarTable');
+        
+        const months = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        
+        monthTitle.textContent = `${months[currentMonth]} ${currentYear}`;
+        
+        function buildCalendar() {
+            calendarTable.innerHTML = '';
+            
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const totalDays = lastDay.getDate();
+            
+            let startDay = firstDay.getDay();
+            if (startDay === 0) startDay = 7;
+            
+            let day = 1;
+            for (let week = 0; week < 6; week++) {
+                const row = document.createElement('tr');
+                
+                for (let weekday = 1; weekday <= 7; weekday++) {
+                    const cell = document.createElement('td');
+                    
+                    if (week === 0 && weekday < startDay) {
+                        cell.textContent = '';
+                    } else if (day > totalDays) {
+                        cell.textContent = '';
+                    } else {
+                        cell.textContent = day;
+                        
+                        if (day === now.getDate() && 
+                            currentMonth === now.getMonth() && 
+                            currentYear === now.getFullYear()) {
+                            cell.classList.add('current-day');
+                        }
+                        
+                        if (weekday === 6 || weekday === 7) {
+                            cell.classList.add('weekend');
+                        }
+                        
+                        day++;
+                    }
+                    
+                    row.appendChild(cell);
+                }
+                
+                calendarTable.appendChild(row);
+                if (day > totalDays) break;
+            }
+        }
+        
+        buildCalendar();
+    </script>
+</body>
+</html>
