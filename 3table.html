@@ -1,0 +1,97 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Таблица умножения</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+            background: #ffcdcd;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        
+        th {
+            color: rgb(0, 0, 0);
+            padding: 12px;
+            font-size: 16px;
+        }
+        
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        tr:hover {
+            background: #f0f0f0;
+        }
+        
+        .header {
+            background: #ebafaf;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Таблица умножения</h1>
+        <table id="multiplicationTable">
+        </table>
+    </div>
+
+    <script>
+        const table = document.getElementById('multiplicationTable');
+
+        const headerRow = document.createElement('tr');
+        const emptyCell = document.createElement('th');
+        emptyCell.className = 'header';
+        emptyCell.textContent = '*';
+        headerRow.appendChild(emptyCell);
+
+        for (let i = 1; i <= 10; i++) {
+            const th = document.createElement('th');
+            th.className = 'header';
+            th.textContent = i;
+            headerRow.appendChild(th);
+        }
+        table.appendChild(headerRow);
+        for (let i = 1; i <= 10; i++) {
+            const row = document.createElement('tr');
+            const multiplierCell = document.createElement('td');
+            multiplierCell.className = 'header';
+            multiplierCell.textContent = i;
+            row.appendChild(multiplierCell);
+            for (let j = 1; j <= 10; j++) {
+                const cell = document.createElement('td');
+                cell.textContent = i * j;
+                row.appendChild(cell);
+            }
+            
+            table.appendChild(row);
+        }
+    </script>
+</body>
+</html>
