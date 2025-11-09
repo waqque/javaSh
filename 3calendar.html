@@ -79,54 +79,43 @@
         
         const monthTitle = document.getElementById('monthTitle');
         const calendarTable = document.getElementById('calendarTable');
-        
+    
         const months = [
             'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
             'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-        ];
-        
+        ]   
         monthTitle.textContent = `${months[currentMonth]} ${currentYear}`;
         
         function buildCalendar() {
             calendarTable.innerHTML = '';
-            
             const firstDay = new Date(currentYear, currentMonth, 1);
             const lastDay = new Date(currentYear, currentMonth + 1, 0);
             const totalDays = lastDay.getDate();
-            
             let startDay = firstDay.getDay();
             if (startDay === 0) startDay = 7;
-            
             let day = 1;
             for (let week = 0; week < 6; week++) {
                 const row = document.createElement('tr');
-                
                 for (let weekday = 1; weekday <= 7; weekday++) {
                     const cell = document.createElement('td');
-                    
                     if (week === 0 && weekday < startDay) {
                         cell.textContent = '';
                     } else if (day > totalDays) {
                         cell.textContent = '';
                     } else {
                         cell.textContent = day;
-                        
                         if (day === now.getDate() && 
                             currentMonth === now.getMonth() && 
                             currentYear === now.getFullYear()) {
                             cell.classList.add('current-day');
                         }
-                        
                         if (weekday === 6 || weekday === 7) {
                             cell.classList.add('weekend');
-                        }
-                        
+                        }       
                         day++;
                     }
-                    
                     row.appendChild(cell);
                 }
-                
                 calendarTable.appendChild(row);
                 if (day > totalDays) break;
             }
@@ -135,4 +124,5 @@
         buildCalendar();
     </script>
 </body>
+
 </html>
