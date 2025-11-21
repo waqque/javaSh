@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Конструктор визиток</title>
+    <style>
+        *, *::before, *::after{
+            box-sizing: border-box;
+        }
+        body {
+            background: #dfdfdf;
+            font-size: 16px;
+            font-family: sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .app {
+            max-width: 1140px;
+            margin: 40px auto 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 60px;
+        }
+        .app__form {
+            padding: 30px 32px;
+            background: white;
+            border-radius: 7px;
+            width: 315px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.04);
+        }
+        .app__result {
+            padding: 33px 34px;
+            background: white;
+            border-radius: 9px;
+            box-shadow: 0 2px 7px rgba(0,0,0,0.09);
+            height: fit-content;
+            min-height: 210px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .app__title{
+            font-size: 20px;
+            margin: 0 0 .5em;
+        }
+        .field {
+            margin-bottom: 16px;
+        }
+        .field__label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: .875em;
+            font-weight: bold;
+        }
+        .field__control {
+            display: block;
+            width: 100%;
+            padding: 6px;
+            margin-bottom: 8px;
+            border: 1px solid #bababa;
+            border-radius: 3px;
+            font-size: 15px;
+        }
+        .switcher {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 10px;
+        }
+        .switcher__item {
+            display: flex;
+            align-items: center;
+        }
+        .switcher__label {
+            margin-left: 5px;
+        }
+        .colors {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 10px;
+        }
+        .circle {
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #aaa;
+            display: inline-block;
+        }
+        .circle.selected { 
+            border-color: #0064e1; 
+        }
+        .sizes {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 10px;
+        }
+        .sizes button {
+            background: #ececec;
+            border: none;
+            padding: 0 7px;
+            border-radius: 3px;
+            font-size: 13px;
+            cursor: pointer;
+            height: 24px;
+        }
+        .sizes button.selected {
+            background: #0064e1;
+            color: #fff;
+        }
+        .submit {
+            margin-top: 16px;
+            padding: 7px 20px;
+            background: #347beb;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .submit:hover {
+            background: #245ba3;
+        }
+        .visit-card {
+            width: 340px;
+            min-height: 170px;
+            text-align: center;
+        }
+        .visit-card__item--orgname {
+            font-size: 13px;
+            color: #444;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .visit-card__item--fio {
+            margin-bottom: 1px;
+            font-weight: bold;
+        }
+        .visit-card__item--position {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        .visit-card__item--phone {
+            font-size: 14px;
+            margin: 2px 0;
+            color: #262626;
+            word-break: break-all;
+        }
+        .visit-card__item--email {
+            font-size: 13px;
+            color: #347beb;
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 2px;
+        }
+        .visit-card__item--address {
+            font-size: 13px;
+            color: #555;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="app__form">
+            <h1 class="app__title">Конструктор визиток</h1>
+            <form id="form" autocomplete="off">
+                <div class="field">
+                    <label class="field__label">Наименование организации:</label>
+                    <input class="field__control" type="text" id="org" value="">
+                </div>
+                <div class="field">
+                    <label class="field__label">Фамилия, имя, отчество:</label>
+                    <input class="field__control" type="text" id="name" value="">
+                    <div class="colors" id="nameColors">
+                        <div class="circle" style="background:#222" data-color="#222"></div>
+                        <div class="circle selected" style="background:#3bffb4" data-color="#3bffb4"></div>
+                        <div class="circle" style="background:#e11e1e" data-color="#e11e1e"></div>
+                        <div class="circle" style="background:#ff8800" data-color="#ff8800"></div>
+                        <div class="circle" style="background:#651eff" data-color="#651eff"></div>
+                        <div class="circle" style="background:#ed82da" data-color="#ed82da"></div>
+                    </div>
+                    <div class="sizes" id="nameSizes">
+                        <button data-size="24px">24px</button>
+                        <button data-size="26px">26px</button>
+                        <button data-size="28px" class="selected">28px</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field__label">Должность:</label>
+                    <input class="field__control" type="text" id="job" value="">
+                    <div class="colors" id="jobColors">
+                        <div class="circle selected" style="background:#222" data-color="#222"></div>
+                        <div class="circle" style="background:#651eff" data-color="#651eff"></div>
+                        <div class="circle" style="background:#ff4747" data-color="#ff4747"></div>
+                        <div class="circle" style="background:#d8d8d8" data-color="#d8d8d8"></div>
+                        <div class="circle" style="background:#ed82da" data-color="#ed82da"></div>
+                    </div>
+                    <div class="sizes" id="jobSizes">
+                        <button data-size="14px" class="selected">14px</button>
+                        <button data-size="16px">16px</button>
+                        <button data-size="18px">18px</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field__label">Телефон:</label>
+                    <input class="field__control" type="tel" id="phone" value="">
+                </div>
+                <div class="field">
+                    <label class="field__label">
+                        <input type="checkbox" id="showEmail">
+                        E-mail
+                    </label>
+                    <input class="field__control" type="email" id="email" value="">
+                </div>
+                <div class="field">
+                    <label class="field__label">
+                        <input type="checkbox" id="showAddress">
+                        Адрес
+                    </label>
+                    <input class="field__control" type="text" id="address" value="">
+                </div>
+                <div class="field">
+                    <button type="submit" class="submit">Применить</button>
+                </div>
+            </form>
+        </div>
+        <div class="app__result" id="cardBlock" style="display:none;">
+            <div class="visit-card" id="visitCard">
+                <div class="visit-card__item visit-card__item--orgname">Название организации</div>
+                <div class="visit-card__item visit-card__item--fio">ФИО</div>
+                <div class="visit-card__item visit-card__item--position">Должность</div>
+                <div class="visit-card__item visit-card__item--phone">Телефон</div>
+                <div class="visit-card__item visit-card__item--email">E-mail</div>
+                <div class="visit-card__item visit-card__item--address">Адрес</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultState = {
+            org: "",
+            name: "",
+            nameColor: "#3bffb4",
+            nameSize: "28px",
+            job: "",
+            jobColor: "#222",
+            jobSize: "14px",
+            phone: "",
+            email: "",
+            showEmail: false,
+            address: "",
+            showAddress: false
+        };
+        
+        let appliedState = {...defaultState};
+        let draftState = {...defaultState};
+        
+        function updateDraft(e) {
+            const id = e.target.id;
+            if (id === "showEmail" || id === "showAddress") {
+                draftState[id] = e.target.checked;
+            } else {
+                draftState[id] = e.target.value;
+            }
+        }
+        function formatPhoneNumber(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            if (cleaned.length === 11) {
+                return `+${cleaned[0]} (${cleaned.substring(1, 4)}) ${cleaned.substring(4, 7)}-${cleaned.substring(7, 9)}-${cleaned.substring(9)}`;
+            } else if (cleaned.length === 10) {
+                return `(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6, 8)}-${cleaned.substring(8)}`;
+            } else {
+                return phone;
+            }
+        }
+        document.querySelectorAll('#nameColors .circle').forEach(el => {
+            el.onclick = function() {
+                document.querySelectorAll('#nameColors .circle').forEach(c => c.classList.remove("selected"));
+                el.classList.add("selected");
+                draftState.nameColor = el.dataset.color;
+            };
+        });
+        document.querySelectorAll('#jobColors .circle').forEach(el => {
+            el.onclick = function() {
+                document.querySelectorAll('#jobColors .circle').forEach(c => c.classList.remove("selected"));
+                el.classList.add("selected");
+                draftState.jobColor = el.dataset.color;
+            };
+        });
+        document.querySelectorAll('#nameSizes button').forEach(el => {
+            el.onclick = function(e) {
+                e.preventDefault();
+                document.querySelectorAll('#nameSizes button').forEach(s => s.classList.remove("selected"));
+                el.classList.add("selected");
+                draftState.nameSize = el.dataset.size;
+            };
+        });
+        document.querySelectorAll('#jobSizes button').forEach(el => {
+            el.onclick = function(e) {
+                e.preventDefault();
+                document.querySelectorAll('#jobSizes button').forEach(s => s.classList.remove("selected"));
+                el.classList.add("selected");
+                draftState.jobSize = el.dataset.size;
+            };
+        });
+        document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="checkbox"]').forEach(el => {
+            el.oninput = updateDraft;
+            el.onchange = updateDraft;
+        });
+        document.getElementById("form").onsubmit = function(e) {
+            e.preventDefault();
+            appliedState = {...draftState};
+            renderCard();
+            document.getElementById("cardBlock").style.display = "flex";
+        };
+        
+        function renderCard() {
+            const formattedPhone = formatPhoneNumber(appliedState.phone);
+            let html = `
+                <div class="visit-card__item visit-card__item--orgname">${appliedState.org}</div>
+                <div class="visit-card__item visit-card__item--fio" style="color:${appliedState.nameColor}; font-size:${appliedState.nameSize};">${appliedState.name}</div>
+                <div class="visit-card__item visit-card__item--position" style="color:${appliedState.jobColor}; font-size:${appliedState.jobSize};">${appliedState.job}</div>
+                <div class="visit-card__item visit-card__item--phone">${formattedPhone}</div>
+                ${appliedState.showEmail ? `<div class="visit-card__item visit-card__item--email">${appliedState.email}</div>` : ""}
+                ${appliedState.showAddress ? `<div class="visit-card__item visit-card__item--address">${appliedState.address}</div>` : ""}
+            `;
+            document.getElementById("visitCard").innerHTML = html;
+        }
+    </script>
+</body>
+</html>
