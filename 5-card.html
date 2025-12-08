@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Задания</title>
+    <style>
+        body {
+            background: grey;
+            font-size: 16px;
+            font-family: sans-serif;
+            color: #707070;
+        }   
+
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .tasks-panel {
+            padding: 32px 15px;
+            background: white;
+            box-shadow: 0px 0px 6px #00000029;
+            box-sizing: border-box;
+        }
+
+        .tasks-panel__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .tasks-panel__title {
+            font-size: 20px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .btn-add-task {
+            display: inline-flex;
+            align-items: center;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            color: #707070;
+            transition: opacity 0.2s;
+        }
+
+        .btn-add-task:hover {
+            opacity: 0.8;
+        }
+
+        .btn-add-task::before {
+            content: "";
+            display: inline-block;
+            width: 17px;
+            height: 17px;
+            margin-right: 6px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23707070"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>') 0 0 no-repeat;
+        }
+
+        .tasks-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+
+        .task-item:nth-child(odd) {
+            background-color: #0606060A;
+        }
+
+        .task-item:nth-child(even) {
+            background-color: #ffffff;
+        }
+
+        .task-checkbox {
+            accent-color: #707070;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .priority-indicator {
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            font-size: 0;
+            margin-right: 10px;
+            transition: all 0.2s;
+        }
+
+        .priority-indicator--active {
+            opacity: 1;
+            width: auto;
+            font-size: 20px;
+        }
+
+        .task-description {
+            margin-right: auto;
+            font-size: 14px;
+            flex: 1;                 
+            min-width: 0;            
+            word-break: break-word;  
+            white-space: normal;     
+            line-height: 1.4;        
+            padding-right: 10px;
+            transition: all 0.2s;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .btn-action {
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+        }
+
+        .task-checkbox:checked + .priority-indicator + .task-description {
+            text-decoration: line-through;
+            opacity: .4;
+        }
+
+        .task-checkbox:checked + .priority-indicator + .task-description + .task-actions .btn-action {
+            opacity: .4;
+        }
+
+        .form-panel {
+            padding: 71px 0;
+            box-sizing: border-box;
+            position: sticky;  
+            top: 0;            
+            align-self: start;
+        }
+
+        .task-form {
+            width: 495px;
+            min-height: 156px;
+            padding: 28px 30px;
+            background: white;
+            box-shadow: 0px 0px 6px #00000029;
+            border-radius: 0px 14px 14px 0px;
+            box-sizing: border-box;
+            
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            transform: translateX(-10px);
+        }
+
+        .form-panel--active .task-form {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateX(0);
+        }
+
+        .task-form__title {
+            font-size: 18px;
+            color: #000000;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #707070;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            display: block;
+            box-sizing: border-box;
+            font-size: 14px;
+            border: 1px solid #AAAAAABF;
+            border-radius: 2px;
+            width: 100%;
+            margin: 0 0 15px 0;
+            padding: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3F88E8;
+        }
+
+        .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 20px;
+        }
+
+        .form-checkbox {
+            accent-color: #707070;
+            width: 17px;
+            height: 17px;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-submit {
+            width: 126px;
+            height: 32px;
+            background: #3F88E8;
+            border-radius: 32px;
+            color: #FFFFFF;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            width: 126px;
+            height: 32px;
+            border: 1px solid #707070;
+            border-radius: 32px;
+            color: #707070;
+            cursor: pointer;
+            background-color: #FFFFFF;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:hover,
+        .btn-cancel:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-submit:active,
+        .btn-cancel:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tasks-panel">
+            <div class="tasks-panel__header">
+                <span class="tasks-panel__title">Список задач</span>
+                <button class="btn-add-task" data-action="new-task">Добавить</button>
+            </div>
+            <ul class="tasks-list">
+                <li class="task-item" data-template hidden>
+                    <input type="checkbox" class="task-checkbox">
+                    <span class="priority-indicator">⚡️</span>
+                    <span class="task-description"></span>
+                    <div class="task-actions">
+                        <button class="btn-action" type="button" data-action="edit">✏️</button>
+                        <button class="btn-action" type="button" data-action="delete">🗑️</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="form-panel">
+            <form class="task-form">
+                <div class="task-form__title">Карточка задачи</div>
+                <label class="form-label">Задача</label>
+                <input type="text" class="form-input" name="description" placeholder="Описание задачи" required>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" class="form-checkbox" name="high-priority">
+                    Высокий приоритет
+                    <span style="font-size: 17px; margin-left: 7px;">⚡️</span>
+                </label>
+                
+                <div class="form-buttons">
+                    <button class="btn-submit" type="submit">Сохранить</button>
+                    <button class="btn-cancel" type="button" data-action="cancel-form">Отменить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        (function() {
+            class TaskManager {
+                constructor(container) {
+                    this.container = container;
+                    this.formPanel = container.querySelector('.form-panel');
+                    this.taskForm = container.querySelector('.task-form');
+                    this.tasksList = container.querySelector('.tasks-list');
+                    this.template = container.querySelector('[data-template]');
+                    this.currentTask = null;
+                    
+                    this.init();
+                }
+                
+                init() {
+                    this.template.removeAttribute('hidden');
+                    this.template.remove();
+
+                    this.setupEventListeners();
+                }
+                
+                setupEventListeners() {
+                    this.container.querySelector('[data-action="new-task"]').addEventListener('click', () => {
+                        this.openForm();
+                        this.taskForm.querySelector('.btn-submit').textContent = 'Сохранить';
+                        this.taskForm.reset();
+                        this.currentTask = null;
+                    });
+
+                    this.container.querySelector('[data-action="cancel-form"]').addEventListener('click', () => {
+                        this.closeForm();
+                    });
+
+                    this.taskForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleFormSubmit();
+                    });
+                }
+                
+                openForm() {
+                    this.formPanel.classList.add('form-panel--active');
+                }
+                
+                closeForm() {
+                    this.formPanel.classList.remove('form-panel--active');
+                    this.taskForm.reset();
+                    this.currentTask = null;
+                }
+                
+                handleFormSubmit() {
+                    const description = this.taskForm.description.value.trim();
+                    const isHighPriority = this.taskForm['high-priority'].checked;
+                    
+                    if (!description) return;
+                    
+                    if (this.currentTask) {
+                        this.updateTask(this.currentTask, description, isHighPriority);
+                    } else {
+
+                        this.createTask(description, isHighPriority);
+                    }
+                    
+                    this.closeForm();
+                }
+                
+                createTask(description, isHighPriority) {
+                    const taskElement = this.template.cloneNode(true);
+                    
+                    taskElement.querySelector('.task-description').textContent = description;
+                    taskElement.querySelector('.priority-indicator').classList.toggle('priority-indicator--active', isHighPriority);
+
+                    taskElement.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
+                        this.editTask(e.target.closest('.task-item'));
+                    });
+                    
+                    taskElement.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
+                        this.deleteTask(e.target.closest('.task-item'));
+                    });
+                    
+                    taskElement.querySelector('.task-checkbox').addEventListener('change', (e) => {
+                        this.toggleTaskComplete(e.target.closest('.task-item'));
+                    });
+                    
+                    this.tasksList.appendChild(taskElement);
+                }
+                
+                editTask(taskElement) {
+                    this.currentTask = taskElement;
+                    const description = taskElement.querySelector('.task-description').textContent;
+                    const isHighPriority = taskElement.querySelector('.priority-indicator').classList.contains('priority-indicator--active');
+                    
+                    this.taskForm.description.value = description;
+                    this.taskForm['high-priority'].checked = isHighPriority;
+                    this.taskForm.querySelector('.btn-submit').textContent = 'Изменить';
+                    
+                    this.openForm();
+                }
+                
+                updateTask(taskElement, description, isHighPriority) {
+                    taskElement.querySelector('.task-description').textContent = description;
+                    taskElement.querySelector('.priority-indicator').classList.toggle('priority-indicator--active', isHighPriority);
+                }
+                
+                deleteTask(taskElement) {
+                    taskElement.remove();
+                }
+                               
+                toggleTaskComplete(taskElement) {
+                    taskElement.style.opacity = taskElement.querySelector('.task-checkbox').checked ? '0.7' : '1';
+                }
+            }
+            document.addEventListener('DOMContentLoaded', () => {
+                const container = document.querySelector('.container');
+                new TaskManager(container);
+            });
+            
+        })();
+    </script>
+</body>
+</html>
