@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Minesweeper 12x12</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #restart {
+      padding: 5px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(12, 30px);
+      grid-template-rows: repeat(12, 30px);
+      gap: 3px;
+      outline: none;
+    }
+
+    .cell {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #aaa;
+      background: #bbb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cell.open {
+      background: #eee;
+      border: 1px solid #999;
+      cursor: default;
+    }
+
+    .cell.flag {
+      background: #fdd;
+      color: #c00;
+    }
+
+    .cell.mine.open {
+      background: #c00;
+      color: #fff;
+    }
+
+    .cell.focused {
+      outline: 2px solid #00aaff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Сапёр 12×12</h1>
+
+  <div id="controls">
+    <button id="restart">Новая игра</button>
+    <span>
+      Стрелки — курсор, Space/Enter — открыть, Ctrl+Space / Ctrl+Enter — флаг,
+      мышь: ЛКМ — открыть, ПКМ — флаг.
+    </span>
+  </div>
+
+  <div id="board" tabindex="0"></div>
+
+  <script>
+    console.log('Скрипт загрузился');
+
+    const SIZE = 12;
+    const MINES_COUNT = 20;
+
+    const boardEl = document.getElementById('board');
+    const restartBtn = document.getElementById('restart');
+
+    let cells = [];
+    let firstClick = true;
+    let cursorRow = 0;
+    let cursorCol = 0;
+    let gameOver = false;
+
+    function createEmptyBoard() {
+      cells = [];
+      for (let r = 0; r < SIZE; r++) {
+        const row = [];
+        for (let c = 0; c < SIZE; c++) {
+          row.push({
+            row: r,
+            col: c,
+            mine: false,
+            open: false,
+            flag: false,
+            count: 0,
+            el: null
+          });
+        }
+        cells.push(row);
+      }
+    }
+
+    function renderBoard() {
+      boardEl.innerHTML = '';
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = cells[r][c];
+          const div = document.createElement('div');
+          div.className = 'cell';
+          div.dataset.row = r;
+          div.dataset.col = c;
+
+          div.addEventListener('click', onLeftClick);
+          div.addEventListener('contextmenu', onRightClick);
+
+          cell.el = div;
+          boardEl.appendChild(div);
+        }
+      }
+      setCursor(0, 0);
+    }
+
+    function placeMines(excludeRow, excludeCol) {
+      let placed = 0;
+      while (placed < MINES_COUNT) {
+        const r = Math.floor(Math.random() * SIZE);
+        const c = Math.floor(Math.random() * SIZE);
+        const cell = cells[r][c];
+        if (cell.mine) continue;
+        if (Math.abs(r - excludeRow) <= 1 && Math.abs(c - excludeCol) <= 1) continue;
+        cell.mine = true;
+        placed++;
+      }
+      calcNumbers();
+    }
+
+    function neighbors(r, c) {
+      const res = [];
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = r + dr;
+          const nc = c + dc;
+          if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+            res.push(cells[nr][nc]);
+          }
+        }
+      }
+      return res;
+    }
+
+    function calcNumbers() {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = cells[r][c];
+          if (cell.mine) continue;
+          cell.count = neighbors(r, c).filter(n => n.mine).length;
+        }
+      }
+    }
+
+    function reallyOpenCell(cell) {
+      if (gameOver || cell.open || cell.flag) return;
+
+      if (firstClick) {
+        firstClick = false;
+        placeMines(cell.row, cell.col);
+      }
+
+      cell.open = true;
+      cell.el.classList.add('open');
+
+      if (cell.mine) {
+        cell.el.classList.add('mine');
+        gameOver = true;
+        revealAllMines();
+        dispatchMineEnd('lose');
+        alert('Вы проиграли!');
+        return;
+      }
+
+      if (cell.count > 0) {
+        cell.el.textContent = cell.count;
+      } else {
+        neighbors(cell.row, cell.col)
+          .filter(n => !n.open && !n.mine)
+          .forEach(n => reallyOpenCell(n));
+      }
+
+      checkWin();
+    }
+
+    function toggleFlag(cell) {
+      if (gameOver || cell.open) return;
+      cell.flag = !cell.flag;
+      cell.el.classList.toggle('flag', cell.flag);
+      cell.el.textContent = cell.flag ? '⚑' : '';
+    }
+
+    function revealAllMines() {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const cell = cells[r][c];
+          if (cell.mine) {
+            cell.el.classList.add('mine', 'open');
+            cell.el.textContent = '💣';
+          }
+        }
+      }
+    }
+
+    function checkWin() {
+      let closed = 0;
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (!cells[r][c].open && !cells[r][c].mine) closed++;
+        }
+      }
+      if (closed === 0 && !gameOver) {
+        gameOver = true;
+        dispatchMineEnd('win');
+        alert('Вы выиграли!');
+      }
+    }
+
+    function onLeftClick(e) {
+      e.preventDefault();
+      const r = parseInt(this.dataset.row, 10);
+      const c = parseInt(this.dataset.col, 10);
+      setCursor(r, c);
+      dispatchMineStep(r, c, { action: 'open' });
+    }
+
+    function onRightClick(e) {
+      e.preventDefault();
+      const r = parseInt(this.dataset.row, 10);
+      const c = parseInt(this.dataset.col, 10);
+      setCursor(r, c);
+      dispatchMineStep(r, c, { action: 'flag' });
+    }
+
+    function setCursor(r, c) {
+      const prev = document.querySelector('.cell.focused');
+      if (prev) prev.classList.remove('focused');
+
+      cursorRow = r;
+      cursorCol = c;
+      const cell = cells[r][c];
+      if (cell && cell.el) {
+        cell.el.classList.add('focused');
+      }
+    }
+
+    boardEl.addEventListener('keydown', (e) => {
+      if (gameOver) return;
+
+      if (e.key === 'ArrowUp') {
+        if (cursorRow > 0) setCursor(cursorRow - 1, cursorCol);
+        e.preventDefault();
+      } else if (e.key === 'ArrowDown') {
+        if (cursorRow < SIZE - 1) setCursor(cursorRow + 1, cursorCol);
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft') {
+        if (cursorCol > 0) setCursor(cursorRow, cursorCol - 1);
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight') {
+        if (cursorCol < SIZE - 1) setCursor(cursorRow, cursorCol + 1);
+        e.preventDefault();
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        const cell = cells[cursorRow][cursorCol];
+        const action = e.ctrlKey ? 'flag' : 'open';
+        dispatchMineStep(cell.row, cell.col, { action });
+        e.preventDefault();
+      }
+    });
+
+    restartBtn.addEventListener('click', () => {
+      restartGame();
+    });
+
+    function dispatchMineStart(firstRow, firstCol) {
+      const event = new CustomEvent('mine.start', {
+        detail: { row: firstRow, col: firstCol }
+      });
+      boardEl.dispatchEvent(event);
+    }
+
+    function dispatchMineStep(row, col, extra = {}) {
+      const event = new CustomEvent('mine.step', {
+        detail: { row, col, ...extra }
+      });
+      boardEl.dispatchEvent(event);
+    }
+
+    function dispatchMineEnd(result) {
+      const event = new CustomEvent('mine.end', {
+        detail: { result }
+      });
+      boardEl.dispatchEvent(event);
+    }
+    boardEl.addEventListener('mine.start', (e) => {
+      const { row, col } = e.detail;
+      console.log('mine.start', { row, col });
+      reallyOpenCell(cells[row][col]);
+    });
+
+    boardEl.addEventListener('mine.step', (e) => {
+      if (gameOver) return;
+
+     const { row, col, action } = e.detail;
+      console.log('mine.step', { row, col, action });
+
+     if (firstClick && action === 'open') {
+       dispatchMineStart(row, col);
+       return;
+     }
+
+  const cell = cells[row][col];
+  if (!cell) return;
+
+  if (action === 'open') {
+    reallyOpenCell(cell);
+  } else if (action === 'flag') {
+    toggleFlag(cell);
+  }
+});
+
+
+    boardEl.addEventListener('mine.end', (e) => {
+      const { result } = e.detail;
+      console.log('Игра завершена, результат:', result);
+    });
+
+    function restartGame() {
+      firstClick = true;
+      gameOver = false;
+      cursorRow = 0;
+      cursorCol = 0;
+      createEmptyBoard();
+      renderBoard();
+      boardEl.focus();
+    }
+
+    restartGame();
+  </script>
+</body>
+</html>
