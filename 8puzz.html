@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Пазл 9x6</title>
+<style>
+    body {
+        margin: 0;
+        font-family: sans-serif;
+        display: flex;
+        height: 100vh;
+    }
+    #left, #right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #left {
+        background: #ffffff;
+    }
+    #right {
+        background: #d9f3f8;
+    }
+    #scatter, #board {
+        position: relative;
+    }
+    #scatter {
+        width: 450px;
+        height: 300px;
+        position: relative;
+    }
+    .tile {
+        width: 50px;
+        height: 50px;
+        background-image: url("cat.jpg");
+        background-size: 450px 300px; /* 9x6 по 50px */
+        position: absolute;
+        box-sizing: border-box;
+        cursor: grab;
+    }
+    .cell {
+        width: 50px;
+        height: 50px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        position: relative;
+    }
+    #board {
+        display: grid;
+        grid-template-columns: repeat(9, 50px);
+        grid-template-rows: repeat(6, 50px);
+        background: #fff;
+    }
+    .cell.over {
+        outline: 2px solid #00a8e8;
+    }
+</style>
+</head>
+<body>
+<div id="left">
+    <div id="scatter"></div>
+</div>
+<div id="right">
+    <div id="board"></div>
+</div>
+
+<script>
+const cols = 9;
+const rows = 6;
+const tileSize = 50;
+const scatter = document.getElementById('scatter');
+const board = document.getElementById('board');
+
+let draggedTile = null;
+
+for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.col = c;
+        cell.dataset.row = r;
+        board.appendChild(cell);
+    }
+}
+const tiles = [];
+for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.draggable = true;
+        tile.dataset.col = c;
+        tile.dataset.row = r;
+        tile.style.backgroundPosition =
+            `-${c * tileSize}px -${r * tileSize}px`;
+        scatter.appendChild(tile);
+        tiles.push(tile);
+    }
+}
+tiles.forEach(tile => {
+    const maxX = scatter.clientWidth - tileSize;
+    const maxY = scatter.clientHeight - tileSize;
+    tile.style.left = Math.random() * maxX + 'px';
+    tile.style.top  = Math.random() * maxY + 'px';
+});
+document.addEventListener('dragstart', e => {
+    if (!e.target.classList.contains('tile')) return;
+    draggedTile = e.target;
+    originParent = draggedTile.parentElement;
+    setTimeout(() => draggedTile.style.opacity = '0.4', 0);
+});
+
+document.addEventListener('dragend', () => {
+    if (draggedTile) draggedTile.style.opacity = '1';
+    draggedTile = null;
+    originParent = null;
+});
+[board, scatter].forEach(zone => {
+    zone.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (e.target.classList.contains('cell')) {
+            e.target.classList.add('over');
+        }
+    });
+    zone.addEventListener('dragleave', e => {
+        if (e.target.classList.contains('cell')) {
+            e.target.classList.remove('over');
+        }
+    });
+    zone.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!draggedTile) return;
+
+        if (e.target.classList.contains('cell')) {
+            e.target.classList.remove('over');
+            const existing = e.target.querySelector('.tile');
+            if (existing) scatter.appendChild(existing);
+
+            draggedTile.style.position = 'absolute';
+            draggedTile.style.left = '0px';
+            draggedTile.style.top  = '0px';
+            e.target.appendChild(draggedTile);
+        } else if (zone === scatter) {
+            const rect = scatter.getBoundingClientRect();
+            draggedTile.style.position = 'absolute';
+            draggedTile.style.left = (e.clientX - rect.left - tileSize / 2) + 'px';
+            draggedTile.style.top  = (e.clientY - rect.top  - tileSize / 2) + 'px';
+            scatter.appendChild(draggedTile);
+        }
+        checkWin();
+    });
+});
+
+function checkWin() {
+    for (const cell of board.children) {
+        const t = cell.querySelector('.tile');
+        if (!t) return;
+        if (Number(t.dataset.col) !== Number(cell.dataset.col) ||
+            Number(t.dataset.row) !== Number(cell.dataset.row)) {
+            return;
+        }
+    }
+    alert('Ураа вы вообще умница!!!');
+}
+</script>
+</body>
+</html>
